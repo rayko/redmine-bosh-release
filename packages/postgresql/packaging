@@ -1,0 +1,28 @@
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+# Available variables
+# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
+# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
+export HOME=/var/vcap
+EXPORT_FILE=$BOSH_INSTALL_TARGET/pgsql.exports
+
+if [ -d $BOSH_INSTALL_TARGET/pgsql ]
+then
+  echo 'PostgreSQL is already installed -> Skipping'
+else
+  tar xfz postgresql/postgresql-9.3.1.tar.gz
+  (
+    cd postgresql-9.3.1
+    ./configure --prefix=$BOSH_INSTALL_TARGET/pgsql --without-readline --without-zlib
+    make
+    make install
+  )
+  rm -r postgresql-9.3.1
+fi
+
+# Init configuration generator
+# echo "export POSTGRESQL=${BOSH_INSTALL_TARGET}/bin/apachectl" > $EXPORT_FILE
+
+
+

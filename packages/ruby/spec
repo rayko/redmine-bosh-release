@@ -1,0 +1,9 @@
+---
+name: ruby
+dependencies: []
+files:
+- ruby/ruby-1.9.3-p448.tar.gz
+- ruby/rubygems-1.8.25.tgz
+- ruby/zlib-1.2.8.tar.gz
+- ruby/yaml-0.1.4.tar.gz
+- ruby/openssl-1.0.1e.tar.gz

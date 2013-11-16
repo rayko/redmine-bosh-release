@@ -1,0 +1,80 @@
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+# Available variables
+# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
+# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
+export HOME=/var/vcap
+EXPORT_FILE=$BOSH_INSTALL_TARGET/apache.exports
+
+
+if [ -d $BOSH_INSTALL_TARGET/apr ]
+then
+  echo 'APR Already installed -> Skipping'
+else
+  tar xfz apache/apr-1.4.8.tar.gz
+  (
+    cd apr-1.4.8
+    ./configure --prefix=$BOSH_INSTALL_TARGET/apr
+    make
+    make install
+    ln -s $BOSH_INSTALL_TARGET/apr/bin/apr-1-config $BOSH_INSTALL_TARGET/apr/bin/apr-config
+  )
+  rm -r apr-1.4.8
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/apr-util ]
+then
+  echo 'APR Utils is already installed -> Skipping'
+else
+  tar xfz apache/apr-util-1.5.2.tar.gz
+  (
+    cd apr-util-1.5.2
+    ./configure --prefix=$BOSH_INSTALL_TARGET/apr-util --with-apr=$BOSH_INSTALL_TARGET/apr/bin
+    make
+    make install
+    ln -s $BOSH_INSTALL_TARGET/apr-util/bin/apu-1-config $BOSH_INSTALL_TARGET/apr-util/bin/apu-config
+  )
+  rm -r apr-util-1.5.2
+fi
+
+
+if [ -d $BOSH_INSTALL_TARGET/pcre ]
+then
+  echo 'PCRE is already installed -> Skipping'
+else
+  tar xfz apache/pcre-8.21.tar.gz
+  (
+    cd pcre-8.21
+    ./configure --prefix=$BOSH_INSTALL_TARGET/pcre
+    make
+    make install
+  )
+  rm -r pcre-8.21
+
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/apache ]
+then
+  echo 'Apache is already installed -> Skipping'
+else
+  tar xfz apache/httpd-2.4.6.tar.gz
+  (
+    cd httpd-2.4.6
+    ./configure --prefix=$BOSH_INSTALL_TARGET/apache --with-apr=$BOSH_INSTALL_TARGET/apr --with-apr-util=$BOSH_INSTALL_TARGET/apr-util --with-pcre=$BOSH_INSTALL_TARGET/pcre
+    make
+    make install
+  )
+  rm -r httpd-2.4.6
+  mkdir $BOSH_INSTALL_TARGET/apache-conf
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-available
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-enabled
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-available
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-enabled
+fi
+
+# Init configuration generator
+echo "export APACHE=${BOSH_INSTALL_TARGET}/bin/apachectl" > $EXPORT_FILE
+echo "export APACHE_DIR=${BOSH_INSTALL_TARGET}" >> $EXPORT_FILE
+echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/bin" >> $EXPORT_FILE
+echo "export APACHE_CONF_DIR=${BOSH_INSTALL_TARGET}/apache-conf" >> $EXPORT_FILE

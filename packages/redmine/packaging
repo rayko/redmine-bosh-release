@@ -1,0 +1,25 @@
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+# Available variables
+# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
+# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
+export HOME=/var/vcap
+
+source $HOME/packages/ruby/ruby/ruby.exports
+tar xfz redmine/redmine-2.3.3.tar.gz
+(
+  mv redmine-2.3.3 $BOSH_INSTALL_TARGET/redmine
+  cd $BOSH_INSTALL_TARGET/redmine
+  
+  # Copy database yml from src
+  
+  
+  bundle install
+  rake generate_secret_token
+  rake db:migrate RAILS_ENV=production
+  RAILS_ENV=production REDMINE_LANG=en rake redmine:load_default_data
+  
+  gem install unicorn
+)
+

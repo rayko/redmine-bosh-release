@@ -1,0 +1,85 @@
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+# Available variables
+# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
+# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
+export HOME=/var/vcap
+export EXPORT_FILE=$BOSH_INSTALL_TARGET/ruby.exports
+
+if [ -d $BOSH_INSTALL_TARGET/zlib ]
+then
+  echo 'Zlib is already installed -> Skipping'
+else
+  tar xfz ruby/zlib-1.2.8.tar.gz
+  (
+    cd zlib-1.2.8
+    ./configure --prefix=$BOSH_INSTALL_TARGET/zlib
+    make
+    make install
+  )
+  rm -r zlib-1.2.8
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/yaml ]
+then
+  echo 'LibYAML is already installed -> Skipping'
+else
+  tar xfz ruby/yaml-0.1.4.tar.gz
+  (
+    cd yaml-0.1.4
+    ./configure --prefix=$BOSH_INSTALL_TARGET/yaml
+    make
+    make install
+  )
+  rm -r yaml-0.1.4
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/openssl ]
+then
+  echo 'OpenSSL is already installed -> Skipping'
+else
+  tar xfz ruby/openssl-1.0.1e.tar.gz
+  (
+    cd openssl-1.0.1e
+    ./configure --prefix=$BOSH_INSTALL_TARGET/openssl
+    make
+    make install
+  )
+  rm -r openssl-1.0.1e
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/ruby ]
+then
+  echo 'Ruby is already installed -> Skipping'
+else
+  tar xfz ruby/ruby-1.9.3-p448.tar.gz
+  (
+    cd ruby-1.9.3-p448
+    ./configure --prefix=$BOSH_INSTALL_TARGET/ruby \
+	--with-zlib-dir=$BOSH_INSTALL_TARGET/zlib \
+	--with-libyaml-dir=$BOSH_INSTALL_TARGET/yaml \
+	--with-openssl-dir=$BOSH_INSTALL_TARGET/openssl
+    make
+    make install
+  )
+  rm -r ruby-1.9.3-p448
+fi
+
+if [ -f $BOSH_INSTALL_TARGET/ruby/bin/gem ]
+then
+  echo 'Rubygems is already installed -> Skipping'
+else
+  tar xfz ruby/rubygems-1.8.25.tgz
+  (
+    cd rubygems-1.8.25
+    $BOSH_INSTALL_TARGET/ruby/bin/ruby setup.rb
+  )
+  rm -r rubygems-1.8.25
+fi
+
+$BOSH_INSTALL_TARGET/ruby/bin/gem install bundler --no-rdoc --no-ri
+
+# Init configuration generator
+echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/ruby/bin" > $EXPORT_FILE
+

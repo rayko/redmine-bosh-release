@@ -1,0 +1,8 @@
+---
+name: apache
+dependencies: []
+files:
+- apache/httpd-2.4.6.tar.gz
+- apache/apr-1.4.8.tar.gz
+- apache/apr-util-1.5.2.tar.gz
+- apache/pcre-8.21.tar.gz
