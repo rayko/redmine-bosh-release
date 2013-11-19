@@ -6,3 +6,5 @@ files:
 - apache/apr-1.4.8.tar.gz
 - apache/apr-util-1.5.2.tar.gz
 - apache/pcre-8.21.tar.gz
+- apache/httpd.conf
+- apache/redmine.vhost

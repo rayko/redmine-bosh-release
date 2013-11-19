@@ -5,3 +5,5 @@ files:
 - redmine/redmine-2.3.3.tar.gz
 - redmine/libxml2-2.7.2.tar.gz
 - redmine/libxslt-1.1.20.tar.gz
+- redmine/database.yml
+- redmine/configuration.yml

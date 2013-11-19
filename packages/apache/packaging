@@ -64,17 +64,32 @@ else
     ./configure --prefix=$BOSH_INSTALL_TARGET/apache --with-apr=$BOSH_INSTALL_TARGET/apr --with-apr-util=$BOSH_INSTALL_TARGET/apr-util --with-pcre=$BOSH_INSTALL_TARGET/pcre
     make
     make install
+    cd ..
   )
   rm -r httpd-2.4.6
-  mkdir $BOSH_INSTALL_TARGET/apache-conf
-  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-available
-  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-enabled
-  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-available
-  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-enabled
 fi
 
+mkdir $BOSH_INSTALL_TARGET/apache-conf
+mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-available
+mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-enabled
+mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-available
+mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-enabled
+
 # Init configuration generator
-echo "export APACHE=${BOSH_INSTALL_TARGET}/bin/apachectl" > $EXPORT_FILE
-echo "export APACHE_DIR=${BOSH_INSTALL_TARGET}" >> $EXPORT_FILE
-echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/bin" >> $EXPORT_FILE
+echo "export APACHE=${BOSH_INSTALL_TARGET}/apache/bin/apachectl" > $EXPORT_FILE
+echo "export APACHE_DIR=${BOSH_INSTALL_TARGET}/apache" >> $EXPORT_FILE
+echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/apache/bin" >> $EXPORT_FILE
 echo "export APACHE_CONF_DIR=${BOSH_INSTALL_TARGET}/apache-conf" >> $EXPORT_FILE
+echo "export APACHE_LOGS=${BOSH_INSTALL_TARGET}/apache/logs" >> $EXPORT_FILE
+
+echo 'Loading configuration...'
+cp apache/httpd.conf $BOSH_INSTALL_TARGET/apache/conf
+cp apache/redmine.vhost $BOSH_INSTALL_TARGET/apache-conf/sites-available
+touch $BOSH_INSTALL_TARGET/apache-conf/httpd.conf
+touch $BOSH_INSTALL_TARGET/apache-conf/ports.conf
+
+sed -i "s|?.*¿|${APACHE_LOGS}|g" $BOSH_INSTALL_TARGET/apache-conf/sites-available/redmine.vhost
+
+echo 'Enabling new vhost...'
+ln -s $BOSH_INSTALL_TARGET/apache-conf/sites-available $BOSH_INSTALL_TARGET/apache-conf/sites-enabled/redmine.vhost
+

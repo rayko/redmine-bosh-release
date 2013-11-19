@@ -78,8 +78,13 @@ else
   rm -r rubygems-1.8.25
 fi
 
-$BOSH_INSTALL_TARGET/ruby/bin/gem install bundler --no-rdoc --no-ri
-
+if [[ -n $($BOSH_INSTALL_TARGET/ruby/bin/gem list | grep bundler) ]]
+then
+  echo 'Bundler is already installed -> Skipping'
+else
+  $BOSH_INSTALL_TARGET/ruby/bin/gem install bundler --no-rdoc --no-ri
+fi
+ 
 # Init configuration generator
 echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/ruby/bin" > $EXPORT_FILE
 
