@@ -23,6 +23,24 @@ fi
 
 # Init configuration generator
 # echo "export POSTGRESQL=${BOSH_INSTALL_TARGET}/bin/apachectl" > $EXPORT_FILE
+echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/pgsql/bin" >> $EXPORT_FILE
+echo "export PGDATA=${BOSH_INSTALL_TARGET}/pg_db" >> $EXPORT_FILE
 
+source $EXPORT_FILE
 
+su vcap -c "${BOSH_INSTALL_TARGET}/pgsql/bin/initdb -E UTF8 -U vcap -D ${PGDATA}"
+
+# Copy config
+cp postgresql/pg_hba.conf $PGDATA
+cp postgresql/postgresql.conf $PGDATA
+
+# Run command
+su vcap -c "/home/compiler/installations/pgsql/bin/postgres -D /home/compiler/installations/pg_db" &
+
+echo 'Wating 5 seconds for db to start'
+sleep 5
+
+# Init commands
+psql -U vcap -d postgres -c "CREATE DATABASE vcap WITH OWNER vcap;"
+psql -U vcap -c "CREATE ROLE redmine WITH LOGIN PASSWORD 'redmine.4561';"
 

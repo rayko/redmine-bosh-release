@@ -4,3 +4,5 @@ dependencies: []
 files:
 - postgresql/postgresql-9.3.1.tar.gz
 - postgresql/readline-6.2.tar.gz
+- postgresql/pg_hba.conf
+- postgresql/postgresql.conf

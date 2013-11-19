@@ -7,19 +7,56 @@ set -u # report the usage of uninitialized variables
 export HOME=/var/vcap
 
 source $HOME/packages/ruby/ruby/ruby.exports
-tar xfz redmine/redmine-2.3.3.tar.gz
-(
-  mv redmine-2.3.3 $BOSH_INSTALL_TARGET/redmine
-  cd $BOSH_INSTALL_TARGET/redmine
+
+if [ -d $BOSH_INSTALL_TARGET/libxml2 ]
+then
+  echo 'LibXML2 is already installed -> Skipping'
+else
+  tar xfz redmine/libxml2-2.7.2.tar.gz
+  (
+    cd libxml2-2.7.2
+    ./configure --prefix=$BOSH_INSTALL_TARGET/libxml2
+    make
+    make install
+  )
+fi
+
+
+if [ -d $BOSH_INSTALL_TARGET/libxlst ]
+then
+  echo 'LibXLST is already installed -> Skipping'
+else
+  tar xfz redmine/libxslt-1.1.20.tar.gz
+  (
+    cd libxslt-1.1.20
+    ./configure --prefix=$BOSH_INSTALL_TARGET/libxlst --with-libxml-src=../libxml2-2.7.2
+    make
+    make install
+  )
+  rm -r libxslt-1.1.20
+  rm -r libxml2-2.7.2
+fi
+
+if [ -d $BOSH_INSTALL_TARGET/redmine ]
+then
+  echo 'Readmine is already installed -> Skipping'
+else
+  tar xfz redmine/redmine-2.3.3.tar.gz
+
+  (
+    mv redmine-2.3.3 $BOSH_INSTALL_TARGET/redmine
+    cd $BOSH_INSTALL_TARGET/redmine
+    
+    # Copy database yml from src
+    # gem install nokogiri -v '1.5.10' --with-
+    gem install nokogiri -v '1.5.10' --no-rdoc --no-ri -- --with-xml2-dir=$BOSH_INSTALL_TARGET/libxml2 --with-xslt-dir=/$BOSH_INSTALL_TARGET/libxlst
+    bundle install --without development test rmagick
+    rake generate_secret_token
+    rake db:migrate RAILS_ENV=production
+    RAILS_ENV=production REDMINE_LANG=en rake redmine:load_default_data
   
-  # Copy database yml from src
-  
-  
-  bundle install
-  rake generate_secret_token
-  rake db:migrate RAILS_ENV=production
-  RAILS_ENV=production REDMINE_LANG=en rake redmine:load_default_data
-  
-  gem install unicorn
-)
+    gem install unicorn
+  )
+  rm -r redmine-2.3.3
+fi
 
