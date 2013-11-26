@@ -69,11 +69,6 @@ else
   rm -r httpd-2.4.6
 fi
 
-mkdir $BOSH_INSTALL_TARGET/apache-conf
-mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-available
-mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-enabled
-mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-available
-mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-enabled
 
 # Init configuration generator
 echo "export APACHE=${BOSH_INSTALL_TARGET}/apache/bin/apachectl" > $EXPORT_FILE
@@ -82,14 +77,28 @@ echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/apache/bin" >> $EXPORT_FILE
 echo "export APACHE_CONF_DIR=${BOSH_INSTALL_TARGET}/apache-conf" >> $EXPORT_FILE
 echo "export APACHE_LOGS=${BOSH_INSTALL_TARGET}/apache/logs" >> $EXPORT_FILE
 
-echo 'Loading configuration...'
-cp apache/httpd.conf $BOSH_INSTALL_TARGET/apache/conf
-cp apache/redmine.vhost $BOSH_INSTALL_TARGET/apache-conf/sites-available
-touch $BOSH_INSTALL_TARGET/apache-conf/httpd.conf
-touch $BOSH_INSTALL_TARGET/apache-conf/ports.conf
+if [ -d $BOSH_INSTALL_TARGET/apache-conf ]
+then
+  echo 'Apache config already exists -> Skipping'
+else
 
-sed -i "s|?.*¿|${APACHE_LOGS}|g" $BOSH_INSTALL_TARGET/apache-conf/sites-available/redmine.vhost
+  source $EXPORT_FILE
 
-echo 'Enabling new vhost...'
-ln -s $BOSH_INSTALL_TARGET/apache-conf/sites-available $BOSH_INSTALL_TARGET/apache-conf/sites-enabled/redmine.vhost
+  mkdir $BOSH_INSTALL_TARGET/apache-conf
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-available
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/sites-enabled
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-available
+  mkdir $BOSH_INSTALL_TARGET/apache-conf/mods-enabled
+  
+  echo 'Loading configuration...'
+  cp apache/httpd.conf $BOSH_INSTALL_TARGET/apache/conf
+  cp apache/redmine.vhost $BOSH_INSTALL_TARGET/apache-conf/sites-available
+  touch $BOSH_INSTALL_TARGET/apache-conf/httpd.conf
+  touch $BOSH_INSTALL_TARGET/apache-conf/ports.conf
+  
+  sed -i "s|?.*¿|${APACHE_LOGS}|g" $BOSH_INSTALL_TARGET/apache-conf/sites-available/redmine.vhost
+  sed -i "s|ServerRoot .*|ServerRoot ${APACHE_DIR}|g" $APACHE_DIR/conf/httpd.conf
 
+  echo 'Enabling new vhost...'
+  ln -s $BOSH_INSTALL_TARGET/apache-conf/sites-available $BOSH_INSTALL_TARGET/apache-conf/sites-enabled/redmine.vhost
+fi

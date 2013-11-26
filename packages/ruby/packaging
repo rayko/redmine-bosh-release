@@ -85,6 +85,7 @@ else
   $BOSH_INSTALL_TARGET/ruby/bin/gem install bundler --no-rdoc --no-ri
 fi
  
+
 # Init configuration generator
 echo "export PATH=$PATH:${BOSH_INSTALL_TARGET}/ruby/bin" > $EXPORT_FILE
 

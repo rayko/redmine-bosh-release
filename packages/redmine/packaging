@@ -48,12 +48,12 @@ else
     mv redmine-2.3.3 $BOSH_INSTALL_TARGET/redmine
 
     echo 'Copying Local Readmine configurations...'
-    cp redmine/database.yml $BOSH_INSTALL_TARGET/redmine/config/
+    cp redmine/database.yml.local $BOSH_INSTALL_TARGET/redmine/config/database.yml
     cp redmine/configuration.yml $BOSH_INSTALL_TARGET/redmine/config/
 
 
     cd $BOSH_INSTALL_TARGET/redmine
-
+    export
     bundle config build.nokogiri --with-xml2-include=$BOSH_INSTALL_TARGET/libxml2/include/libxml2 --with-xml2-lib=$BOSH_INSTALL_TARGET/libxml2/lib --with-xslt-dir=$BOSH_INSTALL_TARGET/libxlst
     bundle config build.pg --with-pg-dir=$BOSH_INSTALL_TARGET/pgsql
     bundle install --without development test rmagick
@@ -70,6 +70,8 @@ else
     kill $PGPROCESS
 
     echo 'Copying remote DB configuration...'
+    cd ..
+    cp redmine/database.yml.remote $BOSH_INSTALL_TARGET/redmine/config/database.yml
 
     echo 'Installing Unicorn server...'
     gem install unicorn

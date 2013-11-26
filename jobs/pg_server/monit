@@ -1,0 +1,5 @@
+check process pg_server
+  with pidfile /var/vcap/sys/run/pg_server/pg_server.pid
+  start program "/var/vcap/jobs/pg_server/bin/monit_debugger pg_server_ctl '/var/vcap/jobs/pg_server/bin/pg_server_ctl start'"
+  stop program "/var/vcap/jobs/pg_server/bin/monit_debugger pg_server_ctl '/var/vcap/jobs/pg_server/bin/pg_server_ctl stop'"
+  group vcap

@@ -1,0 +1,5 @@
+check process apache_server
+  with pidfile /var/vcap/sys/run/apache_server/apache_server.pid
+  start program "/var/vcap/jobs/apache_server/bin/apache_server_ctl start"
+  stop program "/var/vcap/jobs/apache_server/bin/apache_server_ctl stop"
+  group vcap

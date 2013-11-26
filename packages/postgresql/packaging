@@ -32,6 +32,8 @@ if [ -d $PGDATA ]
 then
   echo 'Database already exists -> Skipping'
 else
+  mkdir $PGDATA
+  chown -R vcap:vcap $PGDATA
   su vcap -c "${BOSH_INSTALL_TARGET}/pgsql/bin/initdb -E UTF8 -U vcap -D ${PGDATA}"
 
   # Copy config

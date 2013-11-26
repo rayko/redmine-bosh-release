@@ -1,0 +1,5 @@
+check process redmine_app
+  with pidfile /var/vcap/sys/run/redmine_app/redmine_app.pid
+  start program "/var/vcap/jobs/redmine_app/bin/monit_debugger redmine_app_ctl '/var/vcap/jobs/redmine_app/bin/redmine_app_ctl start'"
+  stop program "/var/vcap/jobs/redmine_app/bin/monit_debugger redmine_app_ctl '/var/vcap/jobs/redmine_app/bin/redmine_app_ctl stop'"
+  group vcap
