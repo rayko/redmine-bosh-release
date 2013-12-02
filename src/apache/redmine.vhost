@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+  ServerName localhost
+  ServerAlias localhost
+
+  RewriteEngine On
+
+  <Proxy balancer://unicornservers>
+    BalancerMember http://127.0.0.1:8080
+  </Proxy>
+
+  # Redirect all non-static requests to rails
+  RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
+  RewriteRule ^/(.*)$ balancer://unicornservers%{REQUEST_URI} [P,QSA,L]
+  RewriteCond %{DOCUMENT_ROOT}/admin/%{REQUEST_FILENAME} !-f
+  RewriteRule ^/admin/(.*)$ balancer://unicornservers/admin/%{REQUEST_URI} [P,QSA,L]
+
+  # ProxyPass /admin/ balancer://unicornservers/
+  # ProxyPassReverse /admin/ balancer://unicornservers/
+  # ProxyPreserveHost on
+
+  <Proxy *>
+    Order deny,allow
+    Allow from all
+  </Proxy>
+
+
+  # Custom log file locations
+  ErrorLog  ?APACHE_LOGS¿/redmine-error.log
+  CustomLog ?APACHE_LOGS¿/redmine-access.log combined
+
+</VirtualHost>
